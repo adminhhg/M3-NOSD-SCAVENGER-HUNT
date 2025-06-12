@@ -1,0 +1,117 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Scavenger Hunt Stamp Card</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+    }
+    .card {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    .stamp {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      background-size: cover;
+      background-position: center;
+    }
+    input[type="email"] {
+      padding: 10px;
+      width: 80%;
+      max-width: 400px;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    #message {
+      margin-top: 20px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Scavenger Hunt Progress</h1>
+  <p>Enter your email to view your digital stamp card</p>
+  <input type="email" id="email" placeholder="your@email.com" />
+  <br />
+  <button onclick="loadProgress()">View Stamps</button>
+
+  <div id="stampCard" class="card"></div>
+  <div id="message"></div>
+
+  <script>
+    const storeIDs = ['JJ01', 'CO02', 'HT03', 'AD04', 'JM05', 'BO06', 'DT07', 'SS08'];
+    const imageMap = {
+      JJ01: 'https://drive.google.com/uc?export=view&id=13KgiiT--cNnWbiZsDd8sBl0B21p49tvT',
+      CO02: 'https://drive.google.com/uc?export=view&id=1be4DJomZOsnNczVngmCqYolWzazOwwmZ',
+      HT03: 'https://drive.google.com/uc?export=view&id=15gYvxlIovMnbd0j8ofM90m_ChOECxfuh',
+      AD04: 'https://drive.google.com/uc?export=view&id=1TU6fMdkAz5KC7JEbDZDi28sTFAvYVcCo',
+      JM05: 'https://drive.google.com/uc?export=view&id=1CmZwTzSyuli5qDQ0ExNl4vfN7MYKEhcU',
+      BO06: 'https://drive.google.com/uc?export=view&id=1pMcslKI_4RnfBHQGiItGwrv9dumbk2vK',
+      DT07: 'https://drive.google.com/uc?export=view&id=1wZXtSy3zach1D5r97Rm_1kZBymhUOEoL',
+      SS08: 'https://drive.google.com/uc?export=view&id=1_5g5Fet5uvMUjXHg8X3gnpbCl1DpkTI7',
+      blank: 'https://drive.google.com/uc?export=view&id=1IZJ2FqmF-r7YnKF4ylJN5EoveNGoLKg3'
+    };
+
+    async function loadProgress() {
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const stampCard = document.getElementById('stampCard');
+      const message = document.getElementById('message');
+      stampCard.innerHTML = '';
+      message.innerText = '';
+
+      if (!email) {
+        alert('Please enter a valid email');
+        return;
+      }
+
+      const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vStckJ3CjXtR6-LPaGFJIVFFCFMjkqNRFNPcZx9r7b9-WRt5w2QUHJwWQ4WBzPdYtfcKJJKkQjG94pg/pub?gid=991273329&single=true&output=csv';
+
+      const response = await fetch(csvUrl);
+      const data = await response.text();
+      const rows = data.split('\n').map(r => r.split(',').map(c => c.trim()));
+      const headers = rows[0];
+      const dataRows = rows.slice(1);
+
+      const filtered = dataRows.filter(row => row[0].toLowerCase() === email);
+
+      if (filtered.length === 0) {
+        message.innerText = 'No results found for this email.';
+        return;
+      }
+
+      let completedCount = 0;
+      for (const id of storeIDs) {
+        const storeRow = filtered.find(row => row[1] === id);
+        const isComplete = storeRow && (storeRow[3].toLowerCase() === 'yes' || storeRow[3] === '✅' || storeRow[3] === 'true');
+        const logo = isComplete ? imageMap[id] : imageMap['blank'];
+        if (isComplete) completedCount++;
+
+        const div = document.createElement('div');
+        div.className = 'stamp';
+        div.style.backgroundImage = `url(${logo})`;
+        stampCard.appendChild(div);
+      }
+
+      if (completedCount === storeIDs.length) {
+        message.innerText = '🎉 You’ve completed the hunt! You’re entered into the raffle!';
+      }
+    }
+  </script>
+</body>
+</html>
