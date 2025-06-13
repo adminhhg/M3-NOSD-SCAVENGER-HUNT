@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Scavenger Hunt Stamp Card</title>
   <style>
     body {
@@ -85,7 +84,6 @@
       const response = await fetch(csvUrl);
       const data = await response.text();
       const rows = data.split('\n').map(r => r.split(',').map(c => c.trim()));
-      const headers = rows[0];
       const dataRows = rows.slice(1);
 
       const filtered = dataRows.filter(row => row[0].toLowerCase() === email);
@@ -98,7 +96,7 @@
       let completedCount = 0;
       for (const id of storeIDs) {
         const storeRow = filtered.find(row => row[1] === id);
-        const isComplete = storeRow && (storeRow[3].toLowerCase() === 'yes' || storeRow[3] === '✅' || storeRow[3] === 'true');
+        const isComplete = storeRow && (storeRow[3].toLowerCase() === 'yes' || storeRow[3] === '✅');
         const logo = isComplete ? imageMap[id] : imageMap['blank'];
         if (isComplete) completedCount++;
 
